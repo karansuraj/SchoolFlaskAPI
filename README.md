@@ -6,7 +6,7 @@ Simple Python flask implementation to query a database of students and classes a
 
 | URL                                                               | Function                                                |
 |-------------------------------------------------------------------|---------------------------------------------------------|
-| /students/all                                                     | JSON list of all students.                              |
+| /students/all                                                     | Returns JSON list of all students.                              |
 | /classes/all                                                      | JSON list of all classes                                |
 | /students?id=&lastname=&firstname=&address=&major=                | JSON list of filter criteria on students                |
 | /classes?id=&amp;lastname=&amp;firstname=&amp;address=&amp;major= | JSON list of all classes by filter criteria on students |
