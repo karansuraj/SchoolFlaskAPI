@@ -3,6 +3,7 @@
 Simple Python flask implementation to query a database of students and classes and add/delete students and classes for students. The local server can be run by running the api_school.py python script.
 
 ##GET API Calls
+
 | URL                                                               | Function                                                |
 |-------------------------------------------------------------------|---------------------------------------------------------|
 | /students/all                                                     | JSON list of all students.                              |
@@ -12,6 +13,7 @@ Simple Python flask implementation to query a database of students and classes a
 
 
 ##POST API Calls
+
 | URL                                                        | Function                                                         |
 |------------------------------------------------------------|------------------------------------------------------------------|
 | /students/add_student?lastname=&firstname=&address=&major= | Inserts new student with criteria into student table in database |
