@@ -4,9 +4,11 @@ import sqlite3
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
+app.config['DATABASE'] = 'school.db'
 
 
 def dict_factory(cursor, row):
+    # Used to iterate table rows
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
@@ -15,12 +17,14 @@ def dict_factory(cursor, row):
 
 @app.errorhandler(404)
 def page_not_found(e):
+    # Used to handle 404 errors
     print(e)
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
 
 @app.route('/', methods=['GET'])
 def home():
+    # Home page
     return '''<h1>School Database</h1>
 <p>An API reading data from a school database.</p>'''
 
@@ -28,8 +32,7 @@ def home():
 @app.route('/classes/all', methods=['GET'])
 def api_get_all_classes():
     # REST API call to get a list of all classes in the database
-
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
     all_students = cur.execute('SELECT * FROM CLASS;').fetchall()
@@ -37,6 +40,15 @@ def api_get_all_classes():
 
 
 @app.route('/classes', methods=['GET'])
+def api_get_class():
+    # REST API call to get class(es) by filter criteria
+    query_parameters = request.args
+    crn = query_parameters.get('id')
+    course_name = query_parameters.get('course_name')
+    return jsonify(get_classes(crn, course_name))
+
+
+@app.route('/students/classes', methods=['GET'])
 def api_get_classes_for_student():
     # REST API call to get a list of all classes for a student
 
@@ -49,11 +61,25 @@ def api_get_classes_for_student():
     return jsonify(classes_for_student(student_id, last_name, first_name, address, major))
 
 
+@app.route('/students/classes/all', methods=['GET'])
+def api_get_classes_for_all_students():
+    # REST API call to get a list of all classes for all students
+    query = "SELECT STD.firstname || ' '|| STD.lastname NAME, CLS.course_name CLASSES FROM STUDENT STD" \
+            " INNER JOIN SCHEDULE_TABLE SCD" \
+            "   ON STD.student_id = SCD.student_id" \
+            " INNER JOIN CLASS CLS" \
+            "   ON CLS.crn = SCD.crn;"
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = dict_factory
+    cur = conn.cursor()
+    results = cur.execute(query).fetchall()
+    return jsonify(convert_to_list(results, 'CLASSES'))
+
+
 @app.route('/students/all', methods=['GET'])
 def api_get_all_students():
     # REST API call to get a list of all students (including courses they're enrolled in)
-
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
     all_students = cur.execute('SELECT * FROM STUDENT;').fetchall()
@@ -63,7 +89,6 @@ def api_get_all_students():
 @app.route('/students', methods=['GET'])
 def api_get_student():
     # REST API call to get student(s) by filter criteria
-
     query_parameters = request.args
     student_id = query_parameters.get('id')
     last_name = query_parameters.get('lastname')
@@ -79,7 +104,7 @@ def api_insert_class():
 
     course_name = request.values.get('course_name')
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         sql = "INSERT INTO CLASS(CRN, COURSE_NAME) " \
               "VALUES((SELECT MAX(CRN) + 1 FROM CLASS), ?)"
         conn.execute(sql, (course_name, ))
@@ -100,7 +125,7 @@ def api_insert_student():
     address = request.values.get('address')
     major = request.values.get('major')
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         sql = "INSERT INTO STUDENT(student_id, lastname, firstname, address, major) " \
               "VALUES((SELECT MAX(student_id) + 1 FROM STUDENT), ?,?,?,?)"
         conn.execute(sql, (last_name, first_name, address, major))
@@ -131,7 +156,7 @@ def api_insert_class_for_student():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         sql = "INSERT INTO SCHEDULE_TABLE(student_id, crn) VALUES(?,?)"
         conn.execute(sql, (student_id, class_id))
         conn.commit()
@@ -157,7 +182,7 @@ def api_update_class():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         student_sql = "UPDATE CLASS SET COURSE_NAME = ? WHERE crn = ? ;"
         conn.execute(student_sql, (course_name, crn))
         conn.commit()
@@ -192,7 +217,7 @@ def api_update_student():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         student_sql = "UPDATE STUDENT SET lastname = ?, firstname = ?, address = ?, major = ? WHERE student_id = ? ;"
         conn.execute(student_sql, (last_name, first_name, address, major, student_id))
         conn.commit()
@@ -215,7 +240,7 @@ def api_delete_class():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         class_sql = "DELETE FROM CLASS WHERE crn = ? ;"
         conn.execute(class_sql, (crn, ))
         # Cascade delete not working, so need to include this
@@ -241,7 +266,7 @@ def api_delete_student():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         student_sql = "DELETE FROM STUDENT WHERE student_id = ? ;"
         conn.execute(student_sql, student_id)
         # Cascade delete not working, so need to include this
@@ -268,7 +293,7 @@ def api_delete_class_for_student():
         return page_not_found(404)
 
     try:
-        conn = sqlite3.connect('school.db')
+        conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
         sql = "DELETE FROM SCHEDULE_TABLE WHERE STUDENT_ID = ? AND CRN = ? ;"
         conn.execute(sql, (student_id, class_id))
         conn.commit()
@@ -302,11 +327,11 @@ def get_student(student_id, last_name, first_name, address, major):
         query += ' major=? AND'
         to_filter.append(major)
     if not (student_id or last_name or first_name or address or major):
-        return page_not_found(404)
+        return []
 
     query = query[:-4] + ';'
 
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
@@ -330,8 +355,11 @@ def get_classes(crn, course_name):
         query += ' course_name=? AND'
         to_filter.append(course_name)
 
+    if not (course_name or crn):
+        return []
+
     query = query[:-4] + ';'
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
     results = cur.execute(query, to_filter).fetchall()
@@ -351,8 +379,11 @@ def get_schedule(student_id, crn):
         query += ' student_id=? AND'
         to_filter.append(student_id)
 
+    if not (student_id or crn):
+        return []
+
     query = query[:-4] + ';'
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
     results = cur.execute(query, to_filter).fetchall()
@@ -362,7 +393,7 @@ def get_schedule(student_id, crn):
 def classes_for_student(student_id, lastname, firstname, address, major):
     # Get a list of all classes a student is enrolled in
 
-    query = "SELECT CLS.course_name Classes FROM STUDENT STD" \
+    query = "SELECT STD.firstname || ' '|| STD.lastname NAME, CLS.course_name CLASSES FROM STUDENT STD" \
             " INNER JOIN SCHEDULE_TABLE SCD" \
             "   ON STD.student_id = SCD.student_id" \
             " INNER JOIN CLASS CLS" \
@@ -386,23 +417,29 @@ def classes_for_student(student_id, lastname, firstname, address, major):
         query += ' STD.major=? AND'
         to_filter.append(major)
 
+    if not (student_id or lastname or firstname or address or major):
+        return []
+
     query = query[:-4] + ';'
 
-    conn = sqlite3.connect('school.db')
+    conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
 
     results = cur.execute(query, to_filter).fetchall()
 
-    return convert_to_list(results, 'Classes')
+    return convert_to_list(results, 'CLASSES')
 
 
 def convert_to_list(dictionary, field):
-    # Convert query output with a single column to a list
+    # Convert query output (list of dicts) with a single column to a list
     out_dict = dict()
-    out_dict[field] = []
+    # out_dict['CLASSES'] = []
     for d in dictionary:
-        out_dict[field].append(d[field])
+        name = d['NAME']
+        if name not in out_dict:
+            out_dict[name] = []
+        out_dict[name].append(d[field])
     return out_dict
 
 
