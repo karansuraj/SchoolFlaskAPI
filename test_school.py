@@ -31,8 +31,8 @@ def client():
 
 def test_empty_db(client):
     """ Validate that database being used for testing has empty tables """
-    students = client.get('/students/all').json
-    classes = client.get('/classes/all').json
+    students = client.get('/students/all').get_json()
+    classes = client.get('/classes/all').get_json()
     assert len(students) == 0 and len(classes) == 0
 
 
@@ -40,7 +40,7 @@ def test_add_student(client):
     """ Test adding new student, and validate there is only 1 student and that all fields are correct as entered """
     client.post(
         '/students/add_student?lastname=Suraj&firstname=Karan&address=10 Out of Ten&major=Biomedical Engineering')
-    students = client.get('/students/all').json
+    students = client.get('/students/all').get_json()
     assert len(students) == 1
     added_student = students[0]
     assert added_student['STUDENT_ID'] == 1
@@ -56,14 +56,14 @@ def test_add_multiple_students(client):
         '/students/add_student?lastname=Suraj&firstname=Karan&address=10 Out of Ten&major=Biomedical Engineering')
     client.post(
         '/students/add_student?lastname=Kipling&firstname=Rudyard&address=2 Lane&major=Literal Engineering')
-    students = client.get('/students/all').json
+    students = client.get('/students/all').get_json()
     assert len(students) == 2
 
 
 def test_add_class(client):
     """ Test adding new class, and validate there is only 1 class and all fields are correct as posted """
     client.post('/classes/add_class?course_name=Underwater Basketweaving')
-    classes = client.get('/classes/all').json
+    classes = client.get('/classes/all').get_json()
     assert len(classes) == 1
     added_class = classes[0]
     assert added_class['CRN'] == 1
@@ -76,7 +76,7 @@ def test_add_student_to_class(client):
         '/students/add_student?lastname=Suraj&firstname=Karan&address=10 Out of Ten&major=Biomedical Engineering')
     client.post('/classes/add_class?course_name=Underwater Basketweaving')
     client.post('/students/add_student_class?student_id=1&class_id=1')
-    schedule = client.get('/students/classes?student_id=1').json
+    schedule = client.get('/students/classes?student_id=1').get_json()
     assert 'Karan Suraj' in schedule and schedule['Karan Suraj'][0] == 'Underwater Basketweaving'
 
 
@@ -85,5 +85,5 @@ def test_delete_student(client):
     client.post(
         '/students/add_student?lastname=Suraj&firstname=Karan&address=10 Out of Ten&major=Biomedical Engineering')
     client.delete('/students/delete_student?id=1')
-    students = client.get('/students/all').json
+    students = client.get('/students/all').get_json()
     assert len(students) == 0
