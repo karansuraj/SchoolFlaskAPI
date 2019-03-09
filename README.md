@@ -1,6 +1,6 @@
 # SchoolFlaskAPI
 
-Simple Python 3 flask implementation to query a database of students and classes and add/delete students and classes for students. The local server can be run by running the **school.py** python script. Test cases written with **pytest** for a few API calls are provided in **test_school.py**. A persisted populated sqlite database, used by the app, and its corresponding SQL are provided in **school.db** and school_db_sample.sql. The base schema for the sqlite database used in the app is provided in school_db_schema.sql
+Simple Python 3 flask implementation to query a database of students, classes, and student enrollments in classes and make create/update/delete transactions on that data. The local server can be run by running the **school.py** python script. Test cases written with **pytest** for a few API calls are provided in **test_school.py**. A persisted populated sqlite database, used by the app, and its corresponding SQL are provided in **school.db** and school_db_sample.sql. The base schema for the sqlite database used in the app is provided in school_db_schema.sql
 
 ## API Calls/Endpoints
 Below is a table of all possible insert/create (POST), update (PUT), delete (DELETE), and view (GET) requests that can be made for this API. A JSON export of sample Postman requests is also provided (school.postman_collection.json).
