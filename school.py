@@ -51,7 +51,6 @@ def api_get_class():
 @app.route('/students/classes', methods=['GET'])
 def api_get_classes_for_student():
     """ REST API call to get a list of all classes for a student """
-
     query_parameters = request.args
     student_id = query_parameters.get('student_id')
     last_name = query_parameters.get('lastname')
