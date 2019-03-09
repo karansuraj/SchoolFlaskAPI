@@ -50,7 +50,7 @@ def api_get_class():
 
 @app.route('/students/classes', methods=['GET'])
 def api_get_classes_for_student():
-    # REST API call to get a list of all classes for a student
+    """ REST API call to get a list of all classes for a student """
 
     query_parameters = request.args
     student_id = query_parameters.get('student_id')
@@ -63,7 +63,7 @@ def api_get_classes_for_student():
 
 @app.route('/students/classes/all', methods=['GET'])
 def api_get_classes_for_all_students():
-    # REST API call to get a list of all classes for all students
+    """ REST API call to get a list of all classes for all students """
     query = "SELECT STD.firstname || ' '|| STD.lastname NAME, CLS.course_name CLASSES FROM STUDENT STD" \
             " INNER JOIN SCHEDULE_TABLE SCD" \
             "   ON STD.student_id = SCD.student_id" \
@@ -78,7 +78,7 @@ def api_get_classes_for_all_students():
 
 @app.route('/students/all', methods=['GET'])
 def api_get_all_students():
-    # REST API call to get a list of all students (including courses they're enrolled in)
+    """ REST API call to get a list of all students (including courses they're enrolled in) """
     conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
@@ -88,7 +88,7 @@ def api_get_all_students():
 
 @app.route('/students', methods=['GET'])
 def api_get_student():
-    # REST API call to get student(s) by filter criteria
+    """ REST API call to get student(s) by filter criteria """
     query_parameters = request.args
     student_id = query_parameters.get('id')
     last_name = query_parameters.get('lastname')
@@ -100,8 +100,7 @@ def api_get_student():
 
 @app.route('/classes/add_class', methods=['POST'])
 def api_insert_class():
-    # REST API call to insert a class into the database (does not check if class already exists, unique id provided)
-
+    """ REST API call to insert a class into database (does not check if class already exists, unique id provided)"""
     course_name = request.values.get('course_name')
     try:
         conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
@@ -118,8 +117,7 @@ def api_insert_class():
 
 @app.route('/students/add_student', methods=['POST'])
 def api_insert_student():
-    # REST API call to insert a student into the database (does not check if student already exists, unique id provided)
-
+    """ REST API call to insert student into database (doesn't check if student already exists, unique id provided)"""
     last_name = request.values.get('lastname')
     first_name = request.values.get('firstname')
     address = request.values.get('address')
@@ -139,8 +137,7 @@ def api_insert_student():
 
 @app.route('/students/add_student_class', methods=['POST'])
 def api_insert_class_for_student():
-    # REST API call to enroll a student in a class
-
+    """ REST API call to enroll a student in a class """
     student_id = request.values.get('student_id')
     class_id = request.values.get('class_id')
 
@@ -169,8 +166,7 @@ def api_insert_class_for_student():
 
 @app.route('/classes/update_class', methods=['PUT'])
 def api_update_class():
-    # REST API call to update a class by crn id
-
+    """ REST API call to update a class by crn id """
     crn = request.values.get('id')
     course_name = request.values.get('course_name')
     class_object = get_classes(crn, None)
@@ -195,8 +191,7 @@ def api_update_class():
 
 @app.route('/students/update_student', methods=['PUT'])
 def api_update_student():
-    # REST API call to update a student by id
-
+    """ REST API call to update a student by id """
     student_id = request.values.get('id')
     last_name = request.values.get('lastname')
     first_name = request.values.get('firstname')
@@ -230,10 +225,8 @@ def api_update_student():
 
 @app.route('/classes/delete_class', methods=['DELETE'])
 def api_delete_class():
-    # REST API call to delete a class from the database (and any classes on the schedule)
-
+    """ REST API call to delete a class from the database (and any classes on the schedule) """
     crn = request.values.get('id')
-
     # Validate that student exists, else 404
     classes = get_classes(crn, None)
     if len(classes) == 0:
@@ -256,10 +249,8 @@ def api_delete_class():
 
 @app.route('/students/delete_student', methods=['DELETE'])
 def api_delete_student():
-    # REST API call to delete a student from the database (and any enrolled classes)
-
+    """ REST API call to delete a student from the database (and any enrolled classes) """
     student_id = request.values.get('id')
-
     # Validate that student exists, else 404
     student = get_student(student_id, None, None, None, None)
     if len(student) == 0:
@@ -282,8 +273,7 @@ def api_delete_student():
 
 @app.route('/students/delete_student_class', methods=['DELETE'])
 def api_delete_class_for_student():
-    # REST API call to delete a student from a class
-
+    """ REST API call to delete a student from a class """
     student_id = request.values.get('student_id')
     class_id = request.values.get('class_id')
 
@@ -306,8 +296,7 @@ def api_delete_class_for_student():
 
 # Helper Functions
 def get_student(student_id, last_name, first_name, address, major):
-    # Get student(s) filtered by id, last name, first name, address, and/or major
-
+    """ Get student(s) filtered by id, last name, first name, address, and/or major """
     query = "SELECT * FROM STUDENT WHERE"
     to_filter = []
 
@@ -343,8 +332,7 @@ def get_student(student_id, last_name, first_name, address, major):
 
 
 def get_classes(crn, course_name):
-    # Get class(es) filtered by crn course number and/or course name
-
+    """ Get class(es) filtered by crn course number and/or course name """
     query = "SELECT * FROM CLASS WHERE"
     to_filter = []
 
@@ -367,8 +355,7 @@ def get_classes(crn, course_name):
 
 
 def get_schedule(student_id, crn):
-    # Get the class enrollments students filtered by student_id and/or crn course number
-
+    """ Get the class enrollments students filtered by student_id and/or crn course number """
     query = "SELECT * FROM SCHEDULE_TABLE WHERE"
     to_filter = []
 
@@ -391,8 +378,7 @@ def get_schedule(student_id, crn):
 
 
 def classes_for_student(student_id, lastname, firstname, address, major):
-    # Get a list of all classes a student is enrolled in
-
+    """ Get a list of all classes a student is enrolled in """
     query = "SELECT STD.firstname || ' '|| STD.lastname NAME, CLS.course_name CLASSES FROM STUDENT STD" \
             " INNER JOIN SCHEDULE_TABLE SCD" \
             "   ON STD.student_id = SCD.student_id" \
@@ -432,7 +418,7 @@ def classes_for_student(student_id, lastname, firstname, address, major):
 
 
 def convert_to_list(dictionary, field):
-    # Convert query output (list of dicts) with a single column to a list
+    """ Convert query output (list of dicts) with a single column to a list """
     out_dict = dict()
     # out_dict['CLASSES'] = []
     for d in dictionary:
@@ -443,4 +429,5 @@ def convert_to_list(dictionary, field):
     return out_dict
 
 
-app.run()
+if __name__ == '__main__':
+    app.run()
