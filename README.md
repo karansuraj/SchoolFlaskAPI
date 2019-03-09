@@ -1,23 +1,9 @@
 # SchoolFlaskAPI
 
-Simple Python flask implementation to query a database of students and classes and add/delete students and classes for students. The local server can be run by running the api_school.py python script.
+Simple Python flask implementation to query a database of students and classes and add/delete students and classes for students. The local server can be run by running the **school.py** python script. Test cases written with **pytest** for a few API calls are provided in **test_school.py**. A persisted populated sqlite database, used by the app, and its corresponding SQL are provided in **school.db** and school_db_sample.sql. The base schema for the sqlite database used in the app is provided in school_db_schema.sql
 
-## GET API Calls
-
-| URL                                                               | Function                                                        |
-|-------------------------------------------------------------------|-----------------------------------------------------------------|
-| /students/all                                                     | Returns JSON list of all students.                              |
-| /classes/all                                                      | Returns JSON list of all classes                                |
-| /students?id=&lastname=&firstname=&address=&major=                | Returns JSON list of filter criteria on students                |
-| /classes?id=&amp;lastname=&amp;firstname=&amp;address=&amp;major= | Returns JSON list of all classes by filter criteria on students |
-
-
-## POST API Calls
-
-| URL                                                        | Function                                                         |
-|------------------------------------------------------------|------------------------------------------------------------------|
-| /students/add_student?lastname=&firstname=&address=&major= | Inserts new student with criteria into student table in database |
-
+## API Calls/Endpoints
+Below is a table of all possible insert/create (POST), update (PUT), delete (DELETE), and view (GET) requests that can be made for this API. A JSON export of sample Postman requests is also provided (school.postman_collection.json).
 
 | Function                                     | Request Type | Params                                                                      | Sample Request URL Format                                          |
 |----------------------------------------------|--------------|-----------------------------------------------------------------------------|--------------------------------------------------------------------|
@@ -35,3 +21,9 @@ Simple Python flask implementation to query a database of students and classes a
 | Get all classes all students are enrolled in | GET          |                                                                             | /students/classes/all                                              |
 | Get student(s)                               | GET          | id (use alone for one student), lastname, firstname, address, major         | /students?id=&lastname=&firstname=&address=&major=                 |
 | Get class(es)                                | GET          | id (use alone for one class), course_name                                   | /classes?id=&course_name=                                          |
+
+## Required Python Dependencies
+..*flask
+..*pytest
+..*sqlite3
+..*tempfile
