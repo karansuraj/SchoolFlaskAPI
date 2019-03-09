@@ -8,7 +8,7 @@ app.config['DATABASE'] = 'school.db'
 
 
 def dict_factory(cursor, row):
-    # Used to iterate table rows
+    """ Used to iterate table rows """
     d = {}
     for idx, col in enumerate(cursor.description):
         d[col[0]] = row[idx]
@@ -17,21 +17,21 @@ def dict_factory(cursor, row):
 
 @app.errorhandler(404)
 def page_not_found(e):
-    # Used to handle 404 errors
+    """ Used to handle 404 errors """
     print(e)
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
 
 
 @app.route('/', methods=['GET'])
 def home():
-    # Home page
+    """ Home page """
     return '''<h1>School Database</h1>
 <p>An API reading data from a school database.</p>'''
 
 
 @app.route('/classes/all', methods=['GET'])
 def api_get_all_classes():
-    # REST API call to get a list of all classes in the database
+    """ REST API call to get a list of all classes in the database """
     conn = sqlite3.connect(app.config['DATABASE'], detect_types=sqlite3.PARSE_DECLTYPES)
     conn.row_factory = dict_factory
     cur = conn.cursor()
@@ -41,7 +41,7 @@ def api_get_all_classes():
 
 @app.route('/classes', methods=['GET'])
 def api_get_class():
-    # REST API call to get class(es) by filter criteria
+    """ REST API call to get class(es) by filter criteria """
     query_parameters = request.args
     crn = query_parameters.get('id')
     course_name = query_parameters.get('course_name')
