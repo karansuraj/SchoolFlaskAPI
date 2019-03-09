@@ -23,7 +23,7 @@ Below is a table of all possible insert/create (POST), update (PUT), delete (DEL
 | Get class(es)                                | GET          | id (use alone for one class), course_name                                   | /classes?id=&course_name=                                          |
 
 ## Required Python Dependencies
-..*flask
-..*pytest
-..*sqlite3
-..*tempfile
+⋅⋅* flask
+⋅⋅* pytest
+..* sqlite3
+..* tempfile
